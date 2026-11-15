@@ -3,13 +3,15 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ContactFormData } from "./validation";
 
+export type ContactSubmissionSource = "server-form" | "api";
+
 export type ContactSubmission = {
   id: string;
   name: string;
   email: string;
   message: string;
   createdAt: string;
-  source: "server-form";
+  source: ContactSubmissionSource;
 };
 
 const dataDir = path.join(process.cwd(), "data");
@@ -24,7 +26,8 @@ function enqueueWrite<T>(task: () => Promise<T>): Promise<T> {
 }
 
 export function appendContactSubmission(
-  data: ContactFormData
+  data: ContactFormData,
+  source: ContactSubmissionSource = "server-form"
 ): Promise<ContactSubmission> {
   return enqueueWrite(async () => {
     const submission: ContactSubmission = {
@@ -33,7 +36,7 @@ export function appendContactSubmission(
       email: data.email,
       message: data.message,
       createdAt: new Date().toISOString(),
-      source: "server-form",
+      source,
     };
     await mkdir(dataDir, { recursive: true });
     const { submissions, corrupted } = await readSubmissions();
