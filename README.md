@@ -1,6 +1,6 @@
 # Personal Portfolio — ISBA 2438 Assignment 2
 
-A personal portfolio built with [Next.js](https://nextjs.org) (App Router), TypeScript, and Tailwind CSS for Xipeng (Mars) Ma. Part 1 is the portfolio (projects, about, server-action contact form); Part 2 adds JSON APIs, a second contact form, and a blog with an admin page — all in this same repo.
+A personal portfolio built with [Next.js](https://nextjs.org) (App Router), TypeScript, and Tailwind CSS for Xipeng (Mars) Ma: portfolio pages with projects, a server-action contact form and a JSON contact API, and a blog with an admin page.
 
 ## Getting Started
 

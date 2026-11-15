@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "My Portfolio",
-  description: "Personal portfolio for ISBA 2438 Assignment 2, Part 1",
+  description: "Personal portfolio for ISBA 2438 Assignment 2",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
