@@ -1,30 +1,18 @@
 import { NextResponse } from "next/server";
 import { appendContactSubmission } from "@/lib/contact/store";
+import { readJsonObject, stringField } from "@/lib/http";
 import { validateContactForm } from "@/lib/contact/validation";
 
 export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { ok: false, error: "Request body must be valid JSON." },
-      { status: 400 }
-    );
+  const parsed = await readJsonObject(request);
+  if (!parsed.ok) {
+    return parsed.response;
   }
 
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return NextResponse.json(
-      { ok: false, error: "Request body must be a JSON object." },
-      { status: 400 }
-    );
-  }
-
-  const fields = body as Record<string, unknown>;
   const result = validateContactForm({
-    name: typeof fields.name === "string" ? fields.name : "",
-    email: typeof fields.email === "string" ? fields.email : "",
-    message: typeof fields.message === "string" ? fields.message : "",
+    name: stringField(parsed.fields, "name"),
+    email: stringField(parsed.fields, "email"),
+    message: stringField(parsed.fields, "message"),
   });
 
   if (!result.ok) {
