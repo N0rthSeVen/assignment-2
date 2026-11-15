@@ -38,7 +38,7 @@ The shared navigation bar (`components/NavBar.tsx`) highlights the active link o
 ## Project Structure
 
 ```
-assignment-2-part1/
+assignment-2/
 ├── app/
 │   ├── layout.tsx                      # Root layout with the NavBar
 │   ├── page.tsx                        # Landing page
