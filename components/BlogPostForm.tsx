@@ -20,13 +20,16 @@ type BlogApiResponse = {
 
 export default function BlogPostForm({
   onCreated,
+  revision = 0,
 }: {
   onCreated?: (post: BlogPost) => void;
+  revision?: number;
 }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [errors, setErrors] = useState<BlogFieldErrors | null>(null);
   const [created, setCreated] = useState<BlogPost | null>(null);
+  const [createdRevision, setCreatedRevision] = useState(revision);
   const [requestFailed, setRequestFailed] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -59,6 +62,7 @@ export default function BlogPostForm({
 
     if (response.status === 201 && body?.ok === true && body.post) {
       setCreated(body.post);
+      setCreatedRevision(revision);
       setTitle("");
       setContent("");
       setSending(false);
@@ -79,7 +83,7 @@ export default function BlogPostForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      {created && (
+      {created && createdRevision === revision && (
         <p role="status" className={successClasses}>
           Post created!{" "}
           <Link

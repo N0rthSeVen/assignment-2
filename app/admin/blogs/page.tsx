@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import BlogPostForm from "@/components/BlogPostForm";
 import BlogPostList from "@/components/BlogPostList";
 import { useBlogPosts } from "@/lib/blogs/useBlogPosts";
 
 export default function AdminBlogsPage() {
   const { posts, loadFailed, updatePost, removePost, reload } = useBlogPosts();
+  const [formRevision, setFormRevision] = useState(0);
 
   return (
     <div className="w-full px-6 py-16">
@@ -18,7 +20,7 @@ export default function AdminBlogsPage() {
         </p>
 
         <div className="mt-10 rounded-xl border border-zinc-200 p-6 sm:p-8 dark:border-zinc-800">
-          <BlogPostForm onCreated={reload} />
+          <BlogPostForm onCreated={reload} revision={formRevision} />
         </div>
 
         <section className="mt-12">
@@ -28,8 +30,14 @@ export default function AdminBlogsPage() {
           <BlogPostList
             posts={posts}
             loadFailed={loadFailed}
-            onUpdated={updatePost}
-            onDeleted={removePost}
+            onUpdated={(oldSlug, post) => {
+              updatePost(oldSlug, post);
+              setFormRevision((key) => key + 1);
+            }}
+            onDeleted={(slug) => {
+              removePost(slug);
+              setFormRevision((key) => key + 1);
+            }}
           />
         </section>
       </div>
