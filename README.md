@@ -153,3 +153,25 @@ The `/contact-me-server-form` form is handled entirely on the server. The files 
 6. **UI states.** `success` shows a green confirmation banner and clears the form. `validation-error` shows a red per-field error under the offending input while keeping the user's values. `save-error` shows a separate red banner ("Something went wrong while saving your message. Please try again."), also keeping the user's values, clearly distinct from a successful send.
 
 The `/contact-me` page submits through the same validation and storage via `POST /api/contact` (see the API section above) and saves with `source: "api"`, so both contact forms share `data/contact-submissions.json`.
+
+## Midterm
+
+- **Notes — `/notes`.** Client-only page for quick notes (title + text) persisted to `localStorage` under the key `notes`. On load, a missing key, unparsable JSON, or JSON that is not an array of well-shaped `{ id, title, text, createdAt }` objects all fall back to an empty list instead of crashing. Reads go through `useSyncExternalStore` (no hydration mismatch, plus cross-tab sync via the `storage` event); each note can be deleted.
+- **Job application tracker — `/applications`.** Create form (company, role, status, applied date, notes) and cards with colored status badges (`Wishlist`, `Applied`, `Interviewing`, `Offer`, `Rejected`), plus Edit and Delete per card. Submissions are stored in `data/applications.json`.
+- **Full CRUD.** Blogs, contact submissions, and projects now support create/read/update/delete end to end. Projects moved out of hardcoded data into `data/projects.json`, and the project pages render dynamically (`force-dynamic`) so runtime API changes appear immediately. Edit forms send the full record, so editing never silently blanks unshown fields.
+- **Admin — `/admin`.** Hub page linking to `/admin/projects`, `/admin/blogs`, and `/admin/contacts`; each lists records with inline Edit forms and Delete buttons, plus a create form. The hub is linked from the NavBar as "Admin".
+
+### API endpoints (midterm)
+
+Every handler logs `[api] METHOD /path` server-side. Errors follow the repo convention: `400 { ok: false, error | errors }`, `404 { ok: false, error }`, `409 { ok: false, errors }` for a duplicate project slug.
+
+| Endpoint | Methods |
+| --- | --- |
+| `/api/blogs` | GET, POST |
+| `/api/blogs/[slug]` | PUT, DELETE |
+| `/api/contact` | GET, POST (POST also served at `/api/contacts`) |
+| `/api/contact/[id]` | GET, PUT, DELETE |
+| `/api/applications` | GET, POST |
+| `/api/applications/[id]` | GET, PUT, DELETE |
+| `/api/projects` | GET, POST |
+| `/api/projects/[slug]` | GET, PUT, DELETE |
