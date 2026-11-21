@@ -5,7 +5,7 @@ import BlogPostList from "@/components/BlogPostList";
 import { useBlogPosts } from "@/lib/blogs/useBlogPosts";
 
 export default function AdminBlogsPage() {
-  const { posts, loadFailed, reload } = useBlogPosts();
+  const { posts, loadFailed, updatePost, removePost, reload } = useBlogPosts();
 
   return (
     <div className="w-full px-6 py-16">
@@ -25,7 +25,12 @@ export default function AdminBlogsPage() {
           <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
             Existing Posts
           </h2>
-          <BlogPostList posts={posts} loadFailed={loadFailed} />
+          <BlogPostList
+            posts={posts}
+            loadFailed={loadFailed}
+            onUpdated={updatePost}
+            onDeleted={removePost}
+          />
         </section>
       </div>
     </div>

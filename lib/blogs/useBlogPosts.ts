@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BlogPost } from "./store";
 
 type BlogsApiResponse = {
@@ -40,9 +40,25 @@ export function useBlogPosts() {
     };
   }, [reloadKey]);
 
+  const updatePost = useCallback((oldSlug: string, post: BlogPost) => {
+    setPosts((previous) =>
+      previous
+        ? previous.map((item) => (item.slug === oldSlug ? post : item))
+        : previous
+    );
+  }, []);
+
+  const removePost = useCallback((slug: string) => {
+    setPosts((previous) =>
+      previous ? previous.filter((item) => item.slug !== slug) : previous
+    );
+  }, []);
+
   return {
     posts,
     loadFailed,
+    updatePost,
+    removePost,
     reload: () => setReloadKey((key) => key + 1),
   };
 }
