@@ -1,7 +1,23 @@
 import { NextResponse } from "next/server";
-import { appendContactSubmission } from "@/lib/contact/store";
+import {
+  appendContactSubmission,
+  getAllContactSubmissions,
+} from "@/lib/contact/store";
 import { readJsonObject, stringField } from "@/lib/http";
 import { validateContactForm } from "@/lib/contact/validation";
+
+export async function GET() {
+  console.log("[api] GET /api/contact");
+  try {
+    const submissions = await getAllContactSubmissions();
+    return NextResponse.json({ ok: true, submissions }, { status: 200 });
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Failed to load contact submissions." },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: Request) {
   const parsed = await readJsonObject(request);
