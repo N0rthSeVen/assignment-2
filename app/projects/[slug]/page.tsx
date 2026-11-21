@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllProjects, getProjectBySlug } from "@/lib/projects";
+import { getProjectBySlug } from "@/lib/projects";
 
-export function generateStaticParams() {
-  return getAllProjects().map(({ slug }) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ProjectPage(
   props: PageProps<"/projects/[slug]">
 ) {
   const { slug } = await props.params;
-  const project = getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     notFound();

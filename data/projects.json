@@ -1,0 +1,55 @@
+[
+  {
+    "slug": "product-inventory-cli",
+    "title": "Product Inventory CLI",
+    "context": "ISBA 2438 Assignment 1",
+    "summary": "A Python 3 standard-library command-line tool for managing a product inventory stored in a JSON file, with strict validation and safe atomic saves.",
+    "description": [
+      "Built for ISBA 2438 Assignment 1, this project is a command-line inventory manager written in Python 3 using only the standard library. It stores products in a JSON file and supports full CRUD operations from the terminal.",
+      "Every input is strictly validated before it touches the data file, and all writes are atomic, so the inventory file is never left in a half-written state. The CLI communicates results through exit codes: 0 for success, 1 for handled errors such as validation failures, and 2 for unexpected errors.",
+      "Beyond CRUD, the tool includes a low-stock reorder report that surfaces products needing restocking. The project is covered by 27 end-to-end tests that exercise the CLI the same way a user would."
+    ],
+    "highlights": [
+      "Python 3 standard library only — no external dependencies",
+      "Full CRUD operations on a JSON-backed data file",
+      "Strict input validation on every command",
+      "Exit codes 0 / 1 / 2 for success, handled errors, and unexpected errors",
+      "Atomic saves keep the JSON file consistent",
+      "Low-stock reorder report for restocking decisions",
+      "27 end-to-end tests covering the CLI"
+    ],
+    "tags": [
+      "Python",
+      "CLI",
+      "JSON",
+      "Testing"
+    ],
+    "githubUrl": "https://github.com/N0rthSeVen/inventory-cli",
+    "featured": true
+  },
+  {
+    "slug": "urban-logistics-optimization",
+    "title": "Sustainable Urban Logistics Optimization",
+    "context": "ISBA 2405 Project 1",
+    "summary": "An optimization study of urban delivery logistics: a Haversine distance matrix feeds four PuLP optimization models, extended with sensitivity analysis and a vehicle-routing bonus model.",
+    "description": [
+      "Built for ISBA 2405 Project 1, this project models sustainable urban logistics as a series of optimization problems. A Haversine distance matrix converts geographic coordinates into realistic travel distances between stops.",
+      "Four PuLP optimization models explore the trade-offs between cost and sustainability in urban delivery, and a sensitivity analysis shows how the optimal solution shifts when key inputs change.",
+      "A bonus vehicle-routing (VRP) model extends the analysis, and seven visualizations communicate the distance matrix, model outputs, and sensitivity results."
+    ],
+    "highlights": [
+      "Haversine distance matrix built from geographic coordinates",
+      "Four PuLP optimization models",
+      "Sensitivity analysis on key inputs",
+      "Bonus vehicle-routing (VRP) model",
+      "Seven visualizations of the results"
+    ],
+    "tags": [
+      "Python",
+      "PuLP",
+      "Optimization",
+      "Data Visualization"
+    ],
+    "featured": true
+  }
+]

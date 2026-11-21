@@ -2,8 +2,10 @@ import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import { getAllProjects } from "@/lib/projects";
 
-export default function Home() {
-  const featuredProjects = getAllProjects().filter(
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const featuredProjects = (await getAllProjects()).filter(
     (project) => project.featured
   );
 

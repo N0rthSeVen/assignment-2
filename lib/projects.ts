@@ -1,3 +1,9 @@
+import { mkdir, rename } from "node:fs/promises";
+import path from "node:path";
+import { enqueueWrite, readJsonArray, writeJsonArray } from "./jsonFile";
+import { slugify } from "./blogs/slug";
+import type { ProjectData } from "./projects/validation";
+
 export type Project = {
   slug: string;
   title: string;
@@ -10,58 +16,117 @@ export type Project = {
   featured: boolean;
 };
 
-const projects: Project[] = [
-  {
-    slug: "product-inventory-cli",
-    title: "Product Inventory CLI",
-    context: "ISBA 2438 Assignment 1",
-    summary:
-      "A Python 3 standard-library command-line tool for managing a product inventory stored in a JSON file, with strict validation and safe atomic saves.",
-    description: [
-      "Built for ISBA 2438 Assignment 1, this project is a command-line inventory manager written in Python 3 using only the standard library. It stores products in a JSON file and supports full CRUD operations from the terminal.",
-      "Every input is strictly validated before it touches the data file, and all writes are atomic, so the inventory file is never left in a half-written state. The CLI communicates results through exit codes: 0 for success, 1 for handled errors such as validation failures, and 2 for unexpected errors.",
-      "Beyond CRUD, the tool includes a low-stock reorder report that surfaces products needing restocking. The project is covered by 27 end-to-end tests that exercise the CLI the same way a user would.",
-    ],
-    highlights: [
-      "Python 3 standard library only — no external dependencies",
-      "Full CRUD operations on a JSON-backed data file",
-      "Strict input validation on every command",
-      "Exit codes 0 / 1 / 2 for success, handled errors, and unexpected errors",
-      "Atomic saves keep the JSON file consistent",
-      "Low-stock reorder report for restocking decisions",
-      "27 end-to-end tests covering the CLI",
-    ],
-    tags: ["Python", "CLI", "JSON", "Testing"],
-    githubUrl: "https://github.com/N0rthSeVen/inventory-cli",
-    featured: true,
-  },
-  {
-    slug: "urban-logistics-optimization",
-    title: "Sustainable Urban Logistics Optimization",
-    context: "ISBA 2405 Project 1",
-    summary:
-      "An optimization study of urban delivery logistics: a Haversine distance matrix feeds four PuLP optimization models, extended with sensitivity analysis and a vehicle-routing bonus model.",
-    description: [
-      "Built for ISBA 2405 Project 1, this project models sustainable urban logistics as a series of optimization problems. A Haversine distance matrix converts geographic coordinates into realistic travel distances between stops.",
-      "Four PuLP optimization models explore the trade-offs between cost and sustainability in urban delivery, and a sensitivity analysis shows how the optimal solution shifts when key inputs change.",
-      "A bonus vehicle-routing (VRP) model extends the analysis, and seven visualizations communicate the distance matrix, model outputs, and sensitivity results.",
-    ],
-    highlights: [
-      "Haversine distance matrix built from geographic coordinates",
-      "Four PuLP optimization models",
-      "Sensitivity analysis on key inputs",
-      "Bonus vehicle-routing (VRP) model",
-      "Seven visualizations of the results",
-    ],
-    tags: ["Python", "PuLP", "Optimization", "Data Visualization"],
-    featured: true,
-  },
-];
+export type CreateProjectResult =
+  | { ok: true; project: Project }
+  | { ok: false; error: "slug-exists" };
 
-export function getAllProjects(): Project[] {
-  return projects;
+export type UpdateProjectResult =
+  | { ok: true; project: Project }
+  | { ok: false; error: "not-found" | "slug-exists" };
+
+const dataDir = path.join(process.cwd(), "data");
+const dataFile = path.join(dataDir, "projects.json");
+
+function backupCorruptedFile(): Promise<void> {
+  const backupFile = path.join(
+    dataDir,
+    `projects.corrupt-${Date.now()}.json`
+  );
+  return rename(dataFile, backupFile).catch(() => undefined);
 }
 
-export function getProjectBySlug(slug: string): Project | undefined {
-  return projects.find((project) => project.slug === slug);
+export async function getAllProjects(): Promise<Project[]> {
+  const { items } = await readJsonArray(dataFile);
+  return items as Project[];
+}
+
+export async function getProjectBySlug(
+  slug: string
+): Promise<Project | undefined> {
+  const { items } = await readJsonArray(dataFile);
+  return (items as Project[]).find((project) => project.slug === slug);
+}
+
+export function createProject(data: ProjectData): Promise<CreateProjectResult> {
+  return enqueueWrite(dataFile, async () => {
+    await mkdir(dataDir, { recursive: true });
+    const { items, corrupted } = await readJsonArray(dataFile);
+    if (corrupted) {
+      await backupCorruptedFile();
+    }
+    const projects = items as Project[];
+    const slug = data.slug ?? slugify(data.title) ?? "";
+    const effectiveSlug = slug || "project";
+    if (projects.some((project) => project.slug === effectiveSlug)) {
+      return { ok: false as const, error: "slug-exists" as const };
+    }
+    const project: Project = {
+      slug: effectiveSlug,
+      title: data.title,
+      context: data.context,
+      summary: data.summary,
+      description: data.description,
+      highlights: data.highlights,
+      tags: data.tags,
+      githubUrl: data.githubUrl,
+      featured: data.featured,
+    };
+    await writeJsonArray(dataFile, [...projects, project]);
+    return { ok: true as const, project };
+  });
+}
+
+export function updateProject(
+  slug: string,
+  data: ProjectData
+): Promise<UpdateProjectResult> {
+  return enqueueWrite(dataFile, async () => {
+    const { items, corrupted } = await readJsonArray(dataFile);
+    if (corrupted) {
+      await backupCorruptedFile();
+    }
+    const projects = items as Project[];
+    const index = projects.findIndex((project) => project.slug === slug);
+    if (index === -1) {
+      return { ok: false as const, error: "not-found" as const };
+    }
+    const nextSlug = data.slug ?? slug;
+    if (
+      nextSlug !== slug &&
+      projects.some((project) => project.slug === nextSlug)
+    ) {
+      return { ok: false as const, error: "slug-exists" as const };
+    }
+    const updated: Project = {
+      ...projects[index],
+      slug: nextSlug,
+      title: data.title,
+      context: data.context,
+      summary: data.summary,
+      description: data.description,
+      highlights: data.highlights,
+      tags: data.tags,
+      githubUrl: data.githubUrl,
+      featured: data.featured,
+    };
+    projects[index] = updated;
+    await writeJsonArray(dataFile, projects);
+    return { ok: true as const, project: updated };
+  });
+}
+
+export function deleteProject(slug: string): Promise<boolean> {
+  return enqueueWrite(dataFile, async () => {
+    const { items, corrupted } = await readJsonArray(dataFile);
+    if (corrupted) {
+      await backupCorruptedFile();
+    }
+    const projects = items as Project[];
+    const next = projects.filter((project) => project.slug !== slug);
+    if (next.length === projects.length) {
+      return false;
+    }
+    await writeJsonArray(dataFile, next);
+    return true;
+  });
 }
